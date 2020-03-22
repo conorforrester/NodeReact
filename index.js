@@ -5,7 +5,7 @@ const app = express();
 //create route handler
 
 app.get('/', (req, res) => {
-    res.send({ hi: 'there' });
+    res.send({ bye: 'Conor'});
 });
 
 //Use port assigned by Heroku, otherwise use port 5000
