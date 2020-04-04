@@ -19,9 +19,10 @@ passport.deserializeUser((id, done) => {    //after getting id from serializeUse
 //.use infrms passport of a new service being used, specific to google
 passport.use(
     new GoogleStrategy({
-    clientID: keys.googleClientID,
-    clientSecret: keys.googleClientSecret,
-    callbackURL: '/auth/google/callback'
+        clientID: keys.googleClientID,
+        clientSecret: keys.googleClientSecret,
+        callbackURL: '/auth/google/callback',
+        proxy: true
     }, (accessToken, refreshToken, profile, done) => {
         //check to see if user record already exists
         User.findOne({ googleId: profile.id }) //find first record with a googleId of profile.id
