@@ -23,18 +23,17 @@ passport.use(
         clientSecret: keys.googleClientSecret,
         callbackURL: '/auth/google/callback',
         proxy: true
-    }, (accessToken, refreshToken, profile, done) => {
+    }, 
+    async (accessToken, refreshToken, profile, done) => {
         //check to see if user record already exists
-        User.findOne({ googleId: profile.id }) //find first record with a googleId of profile.id
-        .then ((existingUser) => {
-            if (existingUser) {
-                // we already have a record with given profile id
-                done(null, existingUser);
-            } else {
-                //we don't have a user with this id, make a new record
-                new User({ googleId: profile.id}).save() //save a new user to database in MongoDB Atlas
-                .then(user => done(null, user));
-            }
-        }) 
+        const existingUser = await User.findOne({ googleId: profile.id }) //find first record with a googleId of profile.id
+        if (existingUser) {
+            // we already have a record with given profile id
+            done(null, existingUser);
+        } else {
+            //we don't have a user with this id, make a new record
+            const user = await new User({ googleId: profile.id}).save() //save a new user to database in MongoDB Atlas
+            done(null, user);
+        } 
     })
 );
