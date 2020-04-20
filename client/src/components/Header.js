@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 class Header extends Component {
     renderContent() {
@@ -18,9 +19,13 @@ class Header extends Component {
             <div>
                 <nav>
                     <div className="nav-wrapper">
-                        <a href="#" className="brand-logo">
+                        <Link 
+                            //this.props.auth exists if signed in, send to surveys, otherwise route to home
+                            to={this.props.auth ? '/surveys' : '/'} 
+                            className="left brand-logo"
+                        >
                             Emaily
-                        </a>
+                        </Link>
                         <ul id="nav-mobile" className="right">
                             {this.renderContent()}
                         </ul>
