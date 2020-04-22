@@ -30,7 +30,7 @@ if (process.env.NODE_ENV === 'production') {
     // Express will serve up production assets i.e. main.js, main.css
     //if get request comes in and not recognized then look into client/build
     //dir and see if there is a file at static/js dir
-    app.use(express.status('client/build'));
+    app.use(express.static('client/build'));
 
     //Express will serve up index.html if it does not recognize route
     const path = require('path');
