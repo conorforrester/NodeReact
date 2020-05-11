@@ -13,25 +13,46 @@ const Survey = mongoose.model('surveys');
 
 module.exports = app => {
 
-    app.get('/api/surveys/thanks', (req, res) => {
+    app.get('/api/surveys', requireLogin, async (req, res) => {
+        const surveys = await Survey.find({ _user: req.user.id })
+            .select({ recipients: false });
+
+        res.send(surveys);
+    });
+
+    app.get('/api/surveys/:surveyId/:choice', (req, res) => {
         res.send('Thanks for voting!');
     });
 
     app.post('/api/surveys/webhooks', (req, res) => {
-        const events = _.map(req.body, ({ email, url }) => {
-            const pathname = new URL(url).pathname; //extract pathname from route
-            const p = new Path('/api/surveys/:surveyId/:choice');   //extract survey ID and choice from pathname
-            const match = p.test(pathname); //will either return an object, or null
-            if (match) {
-                return { email, surveyId: match.surveyId, choice: match.choice};
-            }
-        });
-        //remove undefined elements, return only event objects
-        const compactEvents = _.compact(events);
-        //go through compactEvents, look at email and surveyId property, remove duplicates
-        const uniqueEvents = _.uniqBy(compactEvents, 'email', 'surveyId');
+        const p = new Path('/api/surveys/:surveyId/:choice');   //extract survey ID and choice from pathname
 
-        console.log(uniqueEvents);
+        _.chain(req.body)
+            .map(({ email, url }) => {
+                const match = p.test(new URL(url).pathname); //will either return an object, or null
+                if (match) {
+                    return { email, surveyId: match.surveyId, choice: match.choice};
+                }
+            })
+            .compact()
+            .uniqBy( 'email', 'surveyId')
+            .each(({ surveyId, email, choice }) => {
+                Survey.updateOne({  //find and update one record in Survey collection
+                    _id: surveyId,
+                    recipients: {
+                        $elemMatch: { email: email, responded: false }
+                    }
+                }, 
+                {
+                    //mongo operator, find choice property, and increment by 1
+                    $inc: { [choice]: 1 },
+                    //mongo operator, find recipients subdoc, set responded property
+                    $set: { 'recipients.$.responded': true,
+                    lastResponded: new Date()
+                }
+                }).exec();
+            })
+            .value();
 
         res.send({});
     });
@@ -63,3 +84,4 @@ module.exports = app => {
         }
     });
 };
+

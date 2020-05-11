@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { FETCH_USER } from './types';
+import { FETCH_USER, FETCH_SURVEYS } from './types';
+
 
 export const fetchUser = () => async dispatch => {
     const res = await axios.get('/api/current_user');
@@ -17,3 +18,10 @@ export const submitSurvey = (values, history) => async dispatch => {
     history.push('/surveys');   //receiving history object from withRouter helper in SurveyFormReview
     dispatch({ type: FETCH_USER, payload: res.data });
 };
+
+export const fetchSurveys = () => async dispatch => {
+    const res = await axios.get('/api/surveys');
+
+    //payload containing array of all surveys the user has created
+    dispatch({ type: FETCH_SURVEYS, payload: res.data});
+}
